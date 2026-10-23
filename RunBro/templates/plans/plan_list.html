@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}Мои планы — RunBro{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1><i class="bi bi-list-check"></i> Мои планы</h1>
+    <a href="{% url 'plan_create' %}" class="btn btn-runbro">
+        <i class="bi bi-plus-circle"></i> Новый план
+    </a>
+</div>
+
+{% if plans %}
+    <div class="row g-3">
+        {% for plan in plans %}
+            <div class="col-md-6">
+                <div class="card card-plan h-100 p-3">
+                    <div class="d-flex justify-content-between">
+                        <h5>
+                            {{ plan.goal_race }}
+                            {% if plan.is_active %}
+                                <span class="badge bg-success">активен</span>
+                            {% endif %}
+                        </h5>
+                        <span class="text-muted small">{{ plan.created_at|date:"d.m.Y" }}</span>
+                    </div>
+                    <p class="text-muted mb-2">
+                        Цель: {{ plan.goal_time_formatted }}
+                        • VDOT: {{ plan.snapshot_vdot }}
+                        • {{ plan.total_weeks }} нед.
+                    </p>
+                    <a href="{% url 'plan_detail' plan.pk %}" class="btn btn-outline-secondary btn-sm mt-auto">
+                        Открыть <i class="bi bi-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle"></i>
+        У тебя пока нет планов. <a href="{% url 'plan_create' %}">Создай первый!</a>
+    </div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block title %}Создать план — RunBro{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <h1 class="mb-4">
+            <i class="bi bi-flag-fill" style="color: #FF6B35;"></i>
+            Создать план подготовки
+        </h1>
+
+        <form method="post" class="card p-4 shadow-sm">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="alert alert-danger">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            <div class="mb-4">
+                <label for="{{ form.race_type.id_for_label }}" class="form-label fw-bold">
+                    🏁 {{ form.race_type.label }}
+                </label>
+                {{ form.race_type }}
+                {% if form.race_type.errors %}
+                    <div class="text-danger small">{{ form.race_type.errors }}</div>
+                {% endif %}
+                <small class="text-muted">Выбери дистанцию, к которой готовишься</small>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label fw-bold">⏱ Целевое время</label>
+                <div class="row g-2">
+                    <div class="col-4">
+                        {{ form.hours }}
+                        <small class="text-muted d-block text-center">часы</small>
+                    </div>
+                    <div class="col-4">
+                        {{ form.minutes }}
+                        <small class="text-muted d-block text-center">минуты</small>
+                    </div>
+                    <div class="col-4">
+                        {{ form.seconds }}
+                        <small class="text-muted d-block text-center">секунды</small>
+                    </div>
+                </div>
+                {% if form.hours.errors or form.minutes.errors or form.seconds.errors %}
+                    <div class="text-danger small mt-2">
+                        {% for error in form.hours.errors %}{{ error }}{% endfor %}
+                        {% for error in form.minutes.errors %}{{ error }}{% endfor %}
+                        {% for error in form.seconds.errors %}{{ error }}{% endfor %}
+                    </div>
+                {% endif %}
+                <small class="text-muted">
+                    Например, для марафона за 3 часа 30 минут: 3 / 30 / 0
+                </small>
+            </div>
+
+            <button type="submit" class="btn btn-runbro btn-lg w-100">
+                <i class="bi bi-rocket-takeoff"></i> Сгенерировать план
+            </button>
+        </form>
+
+        <p class="text-muted text-center mt-3">
+            <small>
+                💡 План будет составлен на основе твоего VDOT, рассчитанного по целевой дистанции и времени.
+            </small>
+        </p>
+    </div>
+</div>
+{% endblock %}

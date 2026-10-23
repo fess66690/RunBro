@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}RunBro — твой бро в мире бега{% endblock %}
+
+{% block content %}
+<div class="text-center py-5">
+    <h1 class="display-4 fw-bold">
+        <i class="bi bi-lightning-charge-fill" style="color: #FF6B35;"></i>
+        Run<span style="color: #FF6B35;">Bro</span>
+    </h1>
+    <p class="lead text-muted mt-3">
+        Твой персональный тренер по бегу. Основано на методике Джека Дэниелса.
+    </p>
+    <a href="{% url 'plan_create' %}" class="btn btn-runbro btn-lg mt-4">
+        <i class="bi bi-rocket-takeoff"></i> Создать план
+    </a>
+</div>
+
+<div class="row mt-5 g-4">
+    <div class="col-md-4">
+        <div class="card card-plan h-100 p-3">
+            <h3><i class="bi bi-speedometer2"></i> Точные темпы</h3>
+            <p class="text-muted">Рассчитаем твои темпы (Л, М, П, И, Пв) по системе VDOT.</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card card-plan h-100 p-3">
+            <h3><i class="bi bi-calendar-week"></i> 24 недели</h3>
+            <p class="text-muted">Полный план подготовки от базы до пиковой формы.</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card card-plan h-100 p-3">
+            <h3><i class="bi bi-trophy"></i> 6 дистанций</h3>
+            <p class="text-muted">От 1000 м до марафона. Выбери свою цель.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

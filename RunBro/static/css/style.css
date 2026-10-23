@@ -1,0 +1,74 @@
+/* Цвета RunBro */
+:root {
+    --runbro-orange: #FF6B35;
+    --runbro-dark: #2C3E50;
+    --runbro-heading: #2C3E50;
+    --runbro-surface: #ffffff;
+    --runbro-surface-race: #fef5f5;
+    --runbro-surface-completed: #f0fff4;
+    --runbro-border: #eeeeee;
+    --runbro-zone-bg: #eeeeee;
+    --runbro-zone-text: #333333;
+    color-scheme: light;
+}
+
+[data-bs-theme="dark"] {
+    --runbro-heading: #f8f9fa;
+    --runbro-surface: #212529;
+    --runbro-surface-race: #2c2223;
+    --runbro-surface-completed: #1e2d24;
+    --runbro-border: #495057;
+    --runbro-zone-bg: #343a40;
+    --runbro-zone-text: #f8f9fa;
+    color-scheme: dark;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Плавная смена темы без резких вспышек цвета. */
+body,
+.card,
+.accordion-item,
+.accordion-button,
+.training-card {
+    transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+/* Кнопки */
+.btn-runbro {
+    background-color: var(--runbro-orange);
+    color: white;
+    border: none;
+}
+
+.btn-runbro:hover {
+    background-color: #e85a2a;
+    color: white;
+}
+
+/* Карточки */
+.card-plan {
+    border-left: 4px solid var(--runbro-orange);
+    transition: transform 0.2s;
+}
+
+.card-plan:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+[data-bs-theme="dark"] .card-plan:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
+}
+
+/* Заголовки */
+h1, h2, h3 {
+    color: var(--runbro-heading);
+}
+
+/* Переключатель темы в navbar */
+#theme-toggle {
+    white-space: nowrap;
+}

@@ -6,34 +6,29 @@ from datetime import time, timedelta
 from pathlib import Path
 
 import openpyxl
+from django.conf import settings
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
 from apps.plans.models import VdotReference
 
 
-def to_seconds(value) -> int:
+def pace_to_seconds(value) -> int:
     """
-    Универсально конвертирует значение из Excel в секунды.
-    Поддерживает: datetime.time, datetime.timedelta, int, float, str.
+    Темпы (Easy, Marathon, Threshold, Interval).
+    Excel сохраняет '5:46' как '05:46:00' (часы=5, минуты=46).
+    По смыслу это 5 мин 46 сек = 346 сек.
     """
     if value is None:
         return 0
-
     if isinstance(value, time):
-        return value.hour * 3600 + value.minute * 60 + value.second
-
+        return value.hour * 60 + value.minute  # 5*60 + 46 = 346
     if isinstance(value, timedelta):
         return int(value.total_seconds())
-
     if isinstance(value, (int, float)):
         return int(value)
-
     if isinstance(value, str):
-        s = value.strip()
-        if not s:
-            return 0
-        parts = s.split(':')
+        parts = value.strip().split(':')
         try:
             nums = [int(p) for p in parts]
         except ValueError:
@@ -41,10 +36,38 @@ def to_seconds(value) -> int:
         if len(nums) == 2:
             return nums[0] * 60 + nums[1]
         if len(nums) == 3:
-            return nums[0] * 3600 + nums[1] * 60 + nums[2]
-        if len(nums) == 1:
-            return nums[0]
+            return nums[0] * 60 + nums[1]  # часы трактуем как минуты
+    return 0
 
+
+def time_to_seconds(value, hours_as_hours=False) -> int:
+    """
+    Прогнозы на гонки.
+    hours_as_hours=True — для длинных (полумарафон, марафон): 2:21:04 → 8464
+    hours_as_hours=False — для коротких (1000м…10к): 3:48:00 → 228 сек
+    """
+    if value is None:
+        return 0
+    if isinstance(value, time):
+        if hours_as_hours:
+            return value.hour * 3600 + value.minute * 60 + value.second
+        return value.hour * 60 + value.minute
+    if isinstance(value, timedelta):
+        return int(value.total_seconds())
+    if isinstance(value, (int, float)):
+        return int(value)
+    if isinstance(value, str):
+        parts = value.strip().split(':')
+        try:
+            nums = [int(p) for p in parts]
+        except ValueError:
+            return 0
+        if len(nums) == 2:
+            return nums[0] * 60 + nums[1]
+        if len(nums) == 3:
+            if hours_as_hours:
+                return nums[0] * 3600 + nums[1] * 60 + nums[2]
+            return nums[0] * 60 + nums[1]
     return 0
 
 
@@ -59,21 +82,24 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         vdot_path = Path(options['vdot_file'])
         temp_path = Path(options['temp_file'])
+        if not vdot_path.is_absolute():
+            vdot_path = Path(settings.BASE_DIR) / vdot_path
+        if not temp_path.is_absolute():
+            temp_path = Path(settings.BASE_DIR) / temp_path
 
         if not vdot_path.exists():
             raise CommandError(f'Файл не найден: {vdot_path}')
         if not temp_path.exists():
             raise CommandError(f'Файл не найден: {temp_path}')
 
-        self.stdout.write(f'📂 VDOT:         {vdot_path}')
-        self.stdout.write(f'📂 TrainingTemp: {temp_path}\n')
+        self.stdout.write(f'[dir] VDOT:         {vdot_path}')
+        self.stdout.write(f'[dir] TrainingTemp: {temp_path}\n')
 
-        # --- 1. Парсим VDOT.xlsx (прогнозы) ---
+        # --- 1. VDOT.xlsx (прогнозы) ---
         vdot_wb = openpyxl.load_workbook(vdot_path, data_only=True)
         vdot_ws = vdot_wb.active
         vdot_rows = list(vdot_ws.iter_rows(values_only=True))
-        vdot_header = vdot_rows[0]
-        self.stdout.write(f'   VDOT.xlsx колонки: {vdot_header}')
+        self.stdout.write(f'   VDOT.xlsx колонки: {vdot_rows[0]}')
 
         vdot_data = {}
         for row in vdot_rows[1:]:
@@ -84,24 +110,25 @@ class Command(BaseCommand):
             except (TypeError, ValueError):
                 continue
             vdot_data[vdot_value] = {
-                'predicted_1000m_sec': to_seconds(row[1]),
-                'predicted_1500m_sec': to_seconds(row[2]),
-                'predicted_mile_sec': to_seconds(row[3]),
-                'predicted_3000m_sec': to_seconds(row[4]),
-                'predicted_2mile_sec': to_seconds(row[5]),
-                'predicted_5k_sec': to_seconds(row[6]),
-                'predicted_10k_sec': to_seconds(row[7]),
-                'predicted_half_sec': to_seconds(row[8]),
-                'predicted_marathon_sec': to_seconds(row[9]),
+                # Короткие дистанции — MM:SS
+                'predicted_1000m_sec': time_to_seconds(row[1], hours_as_hours=False),
+                'predicted_1500m_sec': time_to_seconds(row[2], hours_as_hours=False),
+                'predicted_mile_sec': time_to_seconds(row[3], hours_as_hours=False),
+                'predicted_3000m_sec': time_to_seconds(row[4], hours_as_hours=False),
+                'predicted_2mile_sec': time_to_seconds(row[5], hours_as_hours=False),
+                'predicted_5k_sec': time_to_seconds(row[6], hours_as_hours=False),
+                'predicted_10k_sec': time_to_seconds(row[7], hours_as_hours=False),
+                # Длинные — HH:MM:SS
+                'predicted_half_sec': time_to_seconds(row[8], hours_as_hours=True),
+                'predicted_marathon_sec': time_to_seconds(row[9], hours_as_hours=True),
             }
-        self.stdout.write(f'   ✅ Прогнозов: {len(vdot_data)}\n')
+        self.stdout.write(f'   [ok] Прогнозов: {len(vdot_data)}\n')
 
-        # --- 2. Парсим TrainingTemp.xlsx (темпы) ---
+        # --- 2. TrainingTemp.xlsx (темпы) ---
         temp_wb = openpyxl.load_workbook(temp_path, data_only=True)
         temp_ws = temp_wb.active
         temp_rows = list(temp_ws.iter_rows(values_only=True))
-        temp_header = temp_rows[0]
-        self.stdout.write(f'   TrainingTemp.xlsx колонки: {temp_header}')
+        self.stdout.write(f'   TrainingTemp.xlsx колонки: {temp_rows[0]}')
 
         temp_data = {}
         for row in temp_rows[1:]:
@@ -112,23 +139,23 @@ class Command(BaseCommand):
             except (TypeError, ValueError):
                 continue
             temp_data[vdot_value] = {
-                'easy_pace_sec': to_seconds(row[1]),
-                'marathon_pace_sec': to_seconds(row[2]),
-                'threshold_pace_sec': to_seconds(row[3]),
-                'interval_pace_sec': to_seconds(row[4]),
-                'repetition_pace_200m_sec': to_seconds(row[5]),
-                'fast_reps_pace_200m_sec': to_seconds(row[6]),
+                'easy_pace_sec': pace_to_seconds(row[1]),
+                'marathon_pace_sec': pace_to_seconds(row[2]),
+                'threshold_pace_sec': pace_to_seconds(row[3]),
+                'interval_pace_sec': pace_to_seconds(row[4]),
+                'repetition_pace_200m_sec': int(row[5]) if row[5] else 0,
+                'fast_reps_pace_200m_sec': int(row[6]) if row[6] else 0,
             }
-        self.stdout.write(f'   ✅ Темпов: {len(temp_data)}\n')
+        self.stdout.write(f'   [ok] Темпов: {len(temp_data)}\n')
 
-        # --- 3. Объединяем и сохраняем ---
+        # --- 3. Сохраняем ---
         all_vdots = sorted(set(vdot_data.keys()) | set(temp_data.keys()))
-        self.stdout.write(f'🔀 Объединяем: {len(all_vdots)} уникальных VDOT')
+        self.stdout.write(f'[merge] Объединяем: {len(all_vdots)} уникальных VDOT')
 
         with transaction.atomic():
             if options['clear']:
                 deleted, _ = VdotReference.objects.all().delete()
-                self.stdout.write(f'🗑  Удалено старых: {deleted}')
+                self.stdout.write(f'[deleted] Удалено старых: {deleted}')
 
             created = updated = 0
             for vdot_value in all_vdots:
@@ -136,7 +163,7 @@ class Command(BaseCommand):
                 data.update(vdot_data.get(vdot_value, {}))
                 data.update(temp_data.get(vdot_value, {}))
 
-                obj, is_created = VdotReference.objects.update_or_create(
+                _, is_created = VdotReference.objects.update_or_create(
                     vdot_value=vdot_value,
                     defaults=data,
                 )
@@ -146,6 +173,6 @@ class Command(BaseCommand):
                     updated += 1
 
         self.stdout.write(self.style.SUCCESS(
-            f'\n🎉 Готово! Создано: {created}, обновлено: {updated}'
+            f'\n[done] Готово! Создано: {created}, обновлено: {updated}'
         ))
         self.stdout.write(f'   Всего в БД: {VdotReference.objects.count()}')

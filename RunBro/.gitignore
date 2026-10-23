@@ -4,6 +4,10 @@ __pycache__/
 venv/
 env/
 .venv/
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
 
 # Django
 *.log
@@ -25,3 +29,6 @@ Thumbs.db
 
 # Данные (не пушим Excel с лицензионными таблицами из книги)
 data/raw/*.xlsx
+
+# Временный вывод отладочных команд
+out.txt

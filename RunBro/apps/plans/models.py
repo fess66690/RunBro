@@ -1,3 +1,5 @@
+import re
+
 from django.db import models
 
 from apps.core.models import TimeStampedModel
@@ -140,3 +142,102 @@ class GeneratedPlan(TimeStampedModel):
 
     def __str__(self):
         return f'План {self.user.username} ({self.goal_race})'
+
+    @property
+    def goal_time_formatted(self):
+        """Форматирует секунды в 'H:MM:SS' или 'M:SS'."""
+        sec = self.goal_time_seconds
+        h = sec // 3600
+        m = (sec % 3600) // 60
+        s = sec % 60
+        if h > 0:
+            return f'{h}:{m:02d}:{s:02d}'
+        return f'{m}:{s:02d}'
+
+    @property
+    def total_weeks(self):
+        """Считает количество недель в плане."""
+        total = 0
+        for phase in self.plan_data.get('phases', []):
+            for week in phase.get('weeks', []):
+                w = week.get('week')
+                if isinstance(w, int):
+                    total += 1
+                    continue
+                if not isinstance(w, str):
+                    continue
+                match = re.fullmatch(r'\s*(\d+)\s*[-–—]\s*(\d+)\s*', w)
+                if match:
+                    start, end = (int(part) for part in match.groups())
+                    total += max(0, end - start + 1)
+                elif w.strip().isdigit():
+                    total += 1
+        return total
+
+    @property
+    def total_km(self):
+        """Суммирует рассчитанный километраж всех тренировок."""
+        total = 0.0
+        for phase in self.plan_data.get('phases', []):
+            for week in phase.get('weeks', []):
+                for tr in week.get('trainings', []):
+                    km = tr.get('total_km')
+                    if isinstance(km, (int, float)):
+                        total += km
+        return round(total, 1)
+
+    @property
+    def unknown_volume_count(self):
+        """Количество тренировок, объём которых не удалось рассчитать."""
+        count = 0
+        for phase in self.plan_data.get('phases', []):
+            for week in phase.get('weeks', []):
+                for tr in week.get('trainings', []):
+                    if tr.get('volume_unknown'):
+                        count += 1
+        return count
+
+    @property
+    def estimated_volume_count(self):
+        """Количество тренировок с оценённым, а не точным объёмом."""
+        count = 0
+        for phase in self.plan_data.get('phases', []):
+            for week in phase.get('weeks', []):
+                for tr in week.get('trainings', []):
+                    if tr.get('volume_estimated'):
+                        count += 1
+        return count
+
+    @property
+    def description_only_week_count(self):
+        """Количество недельных блоков, заданных только текстом."""
+        count = 0
+        for phase in self.plan_data.get('phases', []):
+            for week in phase.get('weeks', []):
+                if week.get('description') and not week.get('trainings'):
+                    count += 1
+        return count
+
+
+class CompletedWorkout(TimeStampedModel):
+    """Отметка о выполнении тренировки в персональном плане."""
+    plan = models.ForeignKey(
+        GeneratedPlan,
+        on_delete=models.CASCADE,
+        related_name='completed_workouts',
+        verbose_name='План',
+    )
+    workout_key = models.CharField(max_length=64, verbose_name='Ключ тренировки')
+
+    class Meta:
+        verbose_name = 'Выполненная тренировка'
+        verbose_name_plural = 'Выполненные тренировки'
+        constraints = [
+            models.UniqueConstraint(
+                fields=('plan', 'workout_key'),
+                name='unique_completed_workout_per_plan',
+            ),
+        ]
+
+    def __str__(self):
+        return f'{self.plan} — {self.workout_key}'

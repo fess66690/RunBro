@@ -1,0 +1,461 @@
+{
+  "race_type": "3000m",
+  "phases": [
+    {
+      "phase": 1,
+      "name": "Базовая фаза (недели 1-6)",
+      "weeks": [
+        {
+          "week": "1-3",
+          "type": "base",
+          "description": "6 дней в неделю бег в легком темпе + 3-4 дня дополнительные силовые тренировки тренировки",
+          "blocks": []
+        },
+        {
+          "week": "4-6",
+          "type": "base_plus",
+          "description": "6 дней в неделю бег в легком темпе. Один длительный забег (25% недельного километража или 1,5 ч — что меньше). Добавьте 6-8 коротких быстрых отрезков в неделю минимум к четырем тренировкам. 3-4 дня в неделю — дополнительные силовые тренировки",
+          "blocks": []
+        }
+      ]
+    },
+    {
+      "phase": 2,
+      "name": "Фаза развития (недели 7-12)",
+      "weeks": [
+        {
+          "week": 7,
+          "trainings": [
+            {
+              "day": "T1",
+              "type": "series",
+              "zone": "R",
+              "description": "Серии из 2 × (200 м в Пв-темпе + 200 м бега трусцой + 1 × 400 м в Пв-темпе + 400 м бега трусцой)",
+              "series_config": {
+                "target_zone": "R",
+                "target_weekly_percent": [3, 5],
+                "max_work_km": 8,
+                "description_template": "Серии из {repeats} × ({sequence})",
+                "sequence": [
+                  {"distance_m": 200, "zone": "R", "label": "200 м в Пв-темпе"},
+                  {"distance_m": 200, "zone": "E", "label": "200 м бега трусцой"},
+                  {"distance_m": 400, "zone": "R", "label": "1 × 400 м в Пв-темпе"},
+                  {"distance_m": 400, "zone": "E", "label": "400 м бега трусцой"}
+                ]
+              },
+              "constraint": "Общая дистанция в Пв-темпе — 3–5% недельного километража, но не более 8 км"
+            },
+            {
+              "day": "T2",
+              "type": "intervals",
+              "blocks": [
+                {"order": 1, "type": "warmup", "zone": "E", "distance_km": [1.5, 3.0]},
+                {"order": 2, "type": "interval", "zone": "I", "repeats": [2, 3], "distance_m": 800, "rest_sec": [120, 120], "rest_type": "jog"},
+                {"order": 3, "type": "cooldown", "zone": "E", "distance_km": [1.5, 3.0]}
+              ],
+              "constraint": "Общая дистанция в И-темпе — не более 8% недельного километража"
+            },
+            {
+              "day": "T3",
+              "type": "intervals",
+              "blocks": [
+                {"order": 1, "type": "warmup", "zone": "E", "distance_km": [1.5, 3.0]},
+                {"order": 2, "type": "interval", "zone": "T", "repeats": [6, 10], "distance_m": 1000, "rest_sec": [60, 60], "rest_type": "rest"},
+                {"order": 3, "type": "cooldown", "zone": "E", "distance_km": [1.5, 3.0]}
+              ],
+              "constraint": "Общая дистанция в П-темпе — не более 8% недельного километража"
+            }
+          ]
+        },
+        {
+          "week": 8,
+          "trainings": [
+            {
+              "day": "T1",
+              "type": "series",
+              "zone": "R",
+              "description": "3–5 × (2 × 200 м в Пв-темпе + 1 мин бега трусцой) + 1 × 800 м в Пв-темпе + 800 м бега трусцой",
+              "total_repeats": [3, 5]
+            },
+            {
+              "day": "T2",
+              "type": "tempo",
+              "blocks": [
+                {"order": 1, "type": "warmup", "zone": "E", "distance_km": [1.5, 3.0]},
+                {"order": 2, "type": "tempo", "zone": "T", "time_min": 20, "note": "равномерно в П-темпе"},
+                {"order": 3, "type": "interval", "zone": "R", "repeats": [4, 6], "distance_m": 200, "rest_m": 200, "rest_type": "jog"},
+                {"order": 4, "type": "cooldown", "zone": "E", "distance_km": [1.5, 3.0]}
+              ]
+            },
+            {
+              "day": "T3",
+              "type": "rest",
+              "description": "Отдых или лёгкий бег"
+            }
+          ]
+        },
+        {
+          "week": 9,
+          "trainings": [
+            {
+              "day": "T1",
+              "type": "series",
+              "zone": "R",
+              "description": "Серии из 2 × (200 м в Пв-темпе + 200 м бега трусцой + 1 × 400 м в Пв-темпе + 400 м бега трусцой)",
+              "total_repeats": 2,
+              "constraint": "Общая дистанция в Пв-темпе — 3–5% недельного километража, но не более 8 км"
+            },
+            {
+              "day": "T2",
+              "type": "intervals",
+              "blocks": [
+                {"order": 1, "type": "warmup", "zone": "E", "distance_km": [1.5, 3.0]},
+                {"order": 2, "type": "interval", "zone": "I", "repeats": [2, 3], "distance_m": 800, "rest_sec": [120, 120], "rest_type": "jog"},
+                {"order": 3, "type": "cooldown", "zone": "E", "distance_km": [1.5, 3.0]}
+              ],
+              "constraint": "Общая дистанция в И-темпе — не более 8% недельного километража"
+            },
+            {
+              "day": "T3",
+              "type": "intervals",
+              "blocks": [
+                {"order": 1, "type": "warmup", "zone": "E", "distance_km": [1.5, 3.0]},
+                {"order": 2, "type": "interval", "zone": "T", "repeats": [6, 10], "distance_m": 1000, "rest_sec": [60, 60], "rest_type": "rest"},
+                {"order": 3, "type": "cooldown", "zone": "E", "distance_km": [1.5, 3.0]}
+              ],
+              "constraint": "Общая дистанция в П-темпе — не более 8% недельного километража"
+            }
+          ]
+        },
+        {
+          "week": 10,
+          "trainings": [
+            {
+              "day": "T1",
+              "type": "series",
+              "zone": "R",
+              "description": "3–5 × (2 × 200 м в Пв-темпе + 200 м бега трусцой) + 1 × 800 м в Пв-темпе + 800 м бега трусцой",
+              "total_repeats": [3, 5]
+            },
+            {
+              "day": "T2",
+              "type": "tempo",
+              "blocks": [
+                {"order": 1, "type": "warmup", "zone": "E", "distance_km": [1.5, 3.0]},
+                {"order": 2, "type": "tempo", "zone": "M", "time_min": 40, "note": "равномерно в М-темпе"},
+                {"order": 3, "type": "interval", "zone": "R", "repeats": 4, "distance_m": 200, "rest_m": 200, "rest_type": "jog"},
+                {"order": 4, "type": "cooldown", "zone": "E", "distance_km": [1.5, 3.0]}
+              ]
+            },
+            {
+              "day": "T3",
+              "type": "rest",
+              "description": "Отдых или лёгкий бег"
+            }
+          ]
+        },
+        {
+          "week": 11,
+          "trainings": [
+            {
+              "day": "T1",
+              "type": "series",
+              "zone": "R",
+              "description": "Серии из 2 × (200 м в Пв-темпе + 200 м бега трусцой + 1 × 400 м в Пв-темпе + 400 м бега трусцой)",
+              "total_repeats": 2,
+              "constraint": "Общая дистанция в Пв-темпе — 3–5% недельного километража, но не более 8 км"
+            },
+            {
+              "day": "T2",
+              "type": "fartlek",
+              "zone": "T",
+              "description": "3–5 × (2 мин напряжённый бег, 1 мин бег в Л-темпе; 1 мин напряжённый бег, 30 с в Л-темпе; 30 с напряжённый бег, 30 с в Л-темпе)",
+              "constraint": "Общая дистанция напряжённого бега — 8% недельного километража или 10 км — что меньше"
+            },
+            {
+              "day": "T3",
+              "type": "intervals",
+              "blocks": [
+                {"order": 1, "type": "warmup", "zone": "E", "distance_km": [1.5, 3.0]},
+                {"order": 2, "type": "interval", "zone": "T", "repeats": [6, 10], "distance_m": 1000, "rest_sec": [60, 60], "rest_type": "rest"},
+                {"order": 3, "type": "cooldown", "zone": "E", "distance_km": [1.5, 3.0]}
+              ],
+              "constraint": "Общая дистанция в П-темпе — не более 8% недельного километража"
+            }
+          ]
+        },
+        {
+          "week": 12,
+          "trainings": [
+            {
+              "day": "T1",
+              "type": "series",
+              "zone": "R",
+              "description": "3–5 × (2 × 200 м в Пв-темпе + 200 м бега трусцой) + 1 × 800 м в Пв-темпе + 800 м бега трусцой",
+              "total_repeats": [3, 5]
+            },
+            {
+              "day": "T2",
+              "type": "tempo",
+              "blocks": [
+                {"order": 1, "type": "warmup", "zone": "E", "distance_km": [1.5, 3.0]},
+                {"order": 2, "type": "tempo", "zone": "T", "time_min": 20, "note": "равномерно в П-темпе"},
+                {"order": 3, "type": "interval", "zone": "R", "repeats": [4, 6], "distance_m": 200, "rest_m": 200, "rest_type": "jog"},
+                {"order": 4, "type": "cooldown", "zone": "E", "distance_km": [1.5, 3.0]}
+              ]
+            },
+            {
+              "day": "T3",
+              "type": "rest",
+              "description": "Отдых или лёгкий бег"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "phase": 3,
+      "name": "Фаза И-темпа (недели 13-18)",
+      "weeks": [
+        {
+          "week": 13,
+          "trainings": [
+            {
+              "day": "T1",
+              "type": "intervals",
+              "zone": "I",
+              "description": "Серии из (1000, 1200, 1600 м в И-темпе или 4–5 мин напряжённого бега) + 3 мин бега трусцой для восстановления",
+              "constraint": "Общая дистанция серий — 8% недельного километража или 10 км — что меньше"
+            },
+            {
+              "day": "T2",
+              "type": "intervals",
+              "blocks": [
+                {"order": 1, "type": "warmup", "zone": "E", "distance_km": [1.5, 3.0]},
+                {"order": 2, "type": "interval", "zone": "T", "repeats": 2, "distance_m": 1000, "rest_sec": [60, 60], "rest_type": "rest"},
+                {"order": 3, "type": "interval", "zone": "R", "repeats": 4, "distance_m": 200, "rest_m": 200, "rest_type": "jog"},
+                {"order": 4, "type": "cooldown", "zone": "E", "distance_km": [1.5, 3.0]}
+              ],
+              "constraint": "Общая дистанция в П-темпе — не более 8% недельного километража"
+            },
+            {
+              "day": "T3",
+              "type": "intervals",
+              "blocks": [
+                {"order": 1, "type": "interval", "zone": "R", "repeats": 2, "distance_m": 600, "rest_m": 600, "rest_type": "jog", "note": "темп Пв+3 сек"},
+                {"order": 2, "type": "interval", "zone": "R", "repeats": 3, "distance_m": 400, "rest_m": 400, "rest_type": "jog"},
+                {"order": 3, "type": "interval", "zone": "F", "repeats": 4, "distance_m": 300, "rest_m": 400, "rest_type": "jog", "note": "темп Пв−1 сек"},
+                {"order": 4, "type": "interval", "zone": "F", "repeats": 6, "distance_m": 200, "rest_m": 200, "rest_type": "jog"}
+              ]
+            }
+          ]
+        },
+        {
+          "week": 14,
+          "trainings": [
+            {
+              "day": "T1",
+              "type": "intervals",
+              "zone": "I",
+              "description": "Серии из (1000, 1200, 1600 м в И-темпе или 4–5 мин напряжённого бега) + 3 мин бега трусцой для восстановления",
+              "constraint": "Общая дистанция серий — 8% недельного километража или 10 км — что меньше"
+            },
+            {
+              "day": "T2",
+              "type": "intervals",
+              "blocks": [
+                {"order": 1, "type": "warmup", "zone": "E", "distance_km": [1.5, 3.0]},
+                {"order": 2, "type": "interval", "zone": "T", "repeats": 2, "distance_m": 1000, "rest_sec": [60, 60], "rest_type": "rest"},
+                {"order": 3, "type": "interval", "zone": "R", "repeats": 4, "distance_m": 200, "rest_m": 200, "rest_type": "jog"},
+                {"order": 4, "type": "cooldown", "zone": "E", "distance_km": [1.5, 3.0]}
+              ],
+              "constraint": "Общая дистанция в П-темпе — не более 8% недельного километража"
+            },
+            {
+              "day": "T3",
+              "type": "series",
+              "zone": "R",
+              "description": "3–5 × (1 × 800 м в Пв-темпе + 800 м трусцой; 2 × 400 м в Пв-темпе + 400 м трусцой; 4 × 200 м в Пв-темпе + 200 м трусцой)",
+              "constraint": "Общая дистанция в Пв-темпе — не более 5% недельного километража"
+            }
+          ]
+        },
+        {
+          "week": 15,
+          "trainings": [
+            {
+              "day": "T1",
+              "type": "fartlek",
+              "zone": "T",
+              "description": "3–5 × (2 мин напряжённый бег, 1 мин в Л-темпе; 1 мин напряжённый, 30 с Л; 30 с напряжённый, 30 с Л)",
+              "constraint": "Общая дистанция серий — 8% недельного километража или 10 км — что меньше"
+            },
+            {
+              "day": "T2",
+              "type": "intervals",
+              "blocks": [
+                {"order": 1, "type": "warmup", "zone": "E", "distance_km": [1.5, 3.0]},
+                {"order": 2, "type": "interval", "zone": "R", "repeats": [8, 10], "distance_m": 400, "rest_sec": [60, 60], "rest_type": "rest"},
+                {"order": 3, "type": "cooldown", "zone": "E", "distance_km": [1.5, 3.0]}
+              ],
+              "note": "Не начинайте первые отрезки слишком быстро!"
+            },
+            {
+              "day": "T3",
+              "type": "rest",
+              "description": "Отдых или лёгкий бег"
+            }
+          ]
+        },
+        {
+          "week": 16,
+          "trainings": [
+            {
+              "day": "T1",
+              "type": "intervals",
+              "zone": "I",
+              "description": "Серии из (1000, 1200, 1600 м в И-темпе или 4–5 мин напряжённого бега) + 3 мин бега трусцой",
+              "constraint": "Общая дистанция серий — 8% недельного километража или 10 км — что меньше"
+            },
+            {
+              "day": "T2",
+              "type": "intervals",
+              "blocks": [
+                {"order": 1, "type": "warmup", "zone": "E", "distance_km": [1.5, 3.0]},
+                {"order": 2, "type": "interval", "zone": "T", "repeats": 2, "distance_m": 1000, "rest_sec": [60, 60], "rest_type": "rest"},
+                {"order": 3, "type": "interval", "zone": "R", "repeats": 4, "distance_m": 200, "rest_m": 200, "rest_type": "jog"},
+                {"order": 4, "type": "cooldown", "zone": "E", "distance_km": [1.5, 3.0]}
+              ]
+            },
+            {
+              "day": "T3",
+              "type": "intervals",
+              "blocks": [
+                {"order": 1, "type": "interval", "zone": "R", "repeats": 2, "distance_m": 600, "rest_m": 600, "rest_type": "jog"},
+                {"order": 2, "type": "interval", "zone": "R", "repeats": 3, "distance_m": 400, "rest_m": 400, "rest_type": "jog"},
+                {"order": 3, "type": "interval", "zone": "F", "repeats": 4, "distance_m": 300, "rest_m": 300, "rest_type": "jog"},
+                {"order": 4, "type": "interval", "zone": "F", "repeats": 6, "distance_m": 200, "rest_m": 200, "rest_type": "jog"}
+              ]
+            }
+          ]
+        },
+        {
+          "week": 17,
+          "trainings": [
+            {
+              "day": "T1",
+              "type": "intervals",
+              "zone": "I",
+              "description": "Серии 800 или 1000 м в И-темпе + 2 мин бега трусцой",
+              "constraint": "Общая дистанция в И-темпе — не более 8% недельного километража"
+            },
+            {
+              "day": "T2",
+              "type": "intervals",
+              "blocks": [
+                {"order": 1, "type": "warmup", "zone": "E", "distance_km": [1.5, 3.0]},
+                {"order": 2, "type": "interval", "zone": "T", "repeats": 2, "distance_m": 1000, "rest_sec": [60, 60], "rest_type": "rest"},
+                {"order": 3, "type": "interval", "zone": "R", "repeats": 4, "distance_m": 200, "rest_m": 200, "rest_type": "jog"},
+                {"order": 4, "type": "cooldown", "zone": "E", "distance_km": [1.5, 3.0]}
+              ]
+            },
+            {
+              "day": "T3",
+              "type": "series",
+              "zone": "R",
+              "description": "2–3 × (1 × 800 м Пв + 800 м трусцой + 2 × 400 м Пв + 400 м трусцой + 4 × 200 м Пв + 200 м трусцой)",
+              "constraint": "Общая дистанция в Пв-темпе — не более 5% недельного километража"
+            }
+          ]
+        },
+        {
+          "week": 18,
+          "trainings": [
+            {
+              "day": "T1",
+              "type": "intervals",
+              "zone": "I",
+              "description": "Серии 800 или 1000 м в И-темпе + 2 мин бега трусцой",
+              "constraint": "Общая дистанция в И-темпе — не более 8% недельного километража"
+            },
+            {
+              "day": "T2",
+              "type": "intervals",
+              "blocks": [
+                {"order": 1, "type": "warmup", "zone": "E", "distance_km": [1.5, 3.0]},
+                {"order": 2, "type": "interval", "zone": "R", "repeats": [8, 10], "distance_m": 400, "rest_sec": [60, 60], "rest_type": "rest"},
+                {"order": 3, "type": "cooldown", "zone": "E", "distance_km": [1.5, 3.0]}
+              ],
+              "note": "Не начинайте первые отрезки слишком быстро!"
+            },
+            {
+              "day": "T3",
+              "type": "rest",
+              "description": "Отдых или лёгкий бег"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "phase": 4,
+      "name": "Фаза пиковой формы (недели 19-24)",
+      "weeks": [
+        {
+          "week": "19-21",
+          "trainings": [
+            {
+              "day": "T1",
+              "type": "series",
+              "zone": "F",
+              "description": "Серии из 2 × 200 м в Б-темпе + 200–400 м трусцой + 1 × 400 м в Б-темпе + 600–800 м трусцой",
+              "total_repeats": 2,
+              "constraint": "Общая дистанция в Б-темпе — 5% недельного километража или 3200 м — что меньше"
+            },
+            {
+              "day": "T2",
+              "type": "mixed",
+              "blocks": [
+                {"order": 1, "type": "warmup", "zone": "E", "distance_km": [1.5, 3.0]},
+                {"order": 2, "type": "interval", "zone": "R", "repeats": 2, "distance_m": 200, "rest_m": 200, "rest_type": "jog"},
+                {"order": 3, "type": "tempo", "zone": "T", "time_min": [5, 6], "note": "5–6 мин в П-темпе"},
+                {"order": 4, "type": "cooldown", "zone": "E", "distance_km": [1.5, 3.0]}
+              ]
+            },
+            {
+              "day": "T3",
+              "type": "series",
+              "zone": "T",
+              "description": "Серии из (2 × 200 м в Пв + 200 м трусцой + 1600 м в П + 200 м в Б + 400 м трусцой)",
+              "constraint": "В сумме — 20–25 мин в П-темпе"
+            }
+          ]
+        },
+        {
+          "week": "22-24",
+          "trainings": [
+            {
+              "day": "T1",
+              "type": "series",
+              "zone": "F",
+              "description": "3–5 × (2 × 200 м Пв + 200 м трусцой + 1 × 800 м Пв + 800 м трусцой + 300 м Б + 800 м трусцой)",
+              "total_repeats": [3, 5]
+            },
+            {
+              "day": "T2",
+              "type": "series",
+              "zone": "R",
+              "description": "2 × (600 м Пв+3 + 600 м трусцой) + 3 × (400 м Пв + 400 м трусцой) + 4 × (300 м Пв−1 + 300 м трусцой) + 6 × (200 м Б + 200 м трусцой)",
+              "total_repeats": [2, 3]
+            },
+            {
+              "day": "T3",
+              "type": "rest",
+              "description": "Отдых или лёгкий бег"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

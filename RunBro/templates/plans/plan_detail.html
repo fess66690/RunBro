@@ -1,0 +1,443 @@
+{% extends 'base.html' %}
+
+{% block title %}План {{ plan.goal_race }} — RunBro{% endblock %}
+
+{% block extra_css %}
+<style>
+    .plan-header {
+        background: linear-gradient(135deg, #2C3E50 0%, #34495e 100%);
+        color: white;
+        border-radius: 12px;
+        padding: 2rem;
+    }
+    .plan-header h1 {
+        color: white;
+        margin: 0;
+    }
+    .plan-stat {
+        background: rgba(255,255,255,0.1);
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        text-align: center;
+    }
+    .plan-stat .value {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #FF6B35;
+    }
+    .plan-stat .label {
+        font-size: 0.75rem;
+        opacity: 0.8;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    .phase-title {
+        color: var(--runbro-heading);
+        font-weight: 600;
+        font-size: 1.1rem;
+        padding: 0.75rem 0;
+    }
+    .week-accordion .accordion-button:not(.collapsed) {
+        background-color: #FF6B35;
+        color: white;
+    }
+    .week-accordion .accordion-button:not(.collapsed) .badge {
+        background-color: white !important;
+        color: #FF6B35 !important;
+    }
+    .training-card {
+        border-left: 4px solid #FF6B35;
+        background: var(--runbro-surface);
+        border-radius: 8px;
+        padding: 1rem 1.25rem;
+        margin-bottom: 0.75rem;
+    }
+    .training-card.series {
+        border-left-color: #9b59b6;
+    }
+    .training-card.rest {
+        border-left-color: #95a5a6;
+        opacity: 0.7;
+    }
+    .training-card.race {
+        border-left-color: #e74c3c;
+        background: var(--runbro-surface-race);
+    }
+    .training-card.long_run {
+        border-left-color: #3498db;
+    }
+    .training-card.is-completed {
+        border-left-color: #198754;
+        background: var(--runbro-surface-completed);
+    }
+    .block-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.4rem 0.75rem;
+        border-bottom: 1px solid var(--runbro-border);
+        font-size: 0.9rem;
+    }
+    .block-item:last-child { border-bottom: none; }
+    .zone-badge {
+        font-family: monospace;
+        font-weight: bold;
+        padding: 2px 8px;
+        border-radius: 4px;
+        background: var(--runbro-zone-bg);
+        color: var(--runbro-zone-text);
+        font-size: 0.8rem;
+    }
+    .zone-E { background: #d4edda; color: #155724; }
+    .zone-M { background: #cce5ff; color: #004085; }
+    .zone-T { background: #fff3cd; color: #856404; }
+    .zone-I { background: #f8d7da; color: #721c24; }
+    .zone-R { background: #e2d5f1; color: #4a235a; }
+    .zone-F { background: #ffd9d9; color: #7a1717; }
+    @media print {
+        @page { margin: 12mm; }
+        body { background: #fff !important; color: #111 !important; }
+        .text-muted { color: #555 !important; }
+        .navbar, footer, .no-print { display: none !important; }
+        main.container { width: 100%; max-width: none; margin: 0 !important; padding: 0 !important; }
+        .plan-header { background: #fff !important; color: #111 !important; border: 1px solid #bbb; padding: 1rem; }
+        .plan-header h1, .plan-header p, .plan-header small { color: #111 !important; opacity: 1 !important; }
+        .plan-stat { background: #f3f3f3; color: #111; }
+        .plan-stat .value { color: #222; }
+        .progress { border: 1px solid #777; background: #fff; }
+        .progress-bar { background: #777 !important; }
+        .accordion-collapse.collapse { display: block !important; height: auto !important; visibility: visible !important; }
+        .accordion-button { background: #fff !important; color: #111 !important; box-shadow: none !important; }
+        .training-card { break-inside: avoid; page-break-inside: avoid; }
+        .card { box-shadow: none !important; }
+        .card, .accordion-body, .training-card { background: #fff !important; color: #111 !important; }
+        .block-item { border-bottom-color: #ddd !important; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+{# ============ ЗАГОЛОВОК ПЛАНА ============ #}
+<div class="plan-header mb-4">
+    <div class="mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <strong>Прогресс выполнения</strong>
+            <span>{{ completed_workouts }} / {{ total_workouts }} ({{ progress_percent }}%)</span>
+        </div>
+        {% if total_workouts %}
+            <div class="progress" role="progressbar" aria-label="Прогресс выполнения плана"
+                 aria-valuenow="{{ progress_percent }}" aria-valuemin="0" aria-valuemax="100">
+                <div class="progress-bar bg-success" style="width: {{ progress_percent }}%"></div>
+            </div>
+        {% else %}
+            <small>В плане пока нет тренировок для отметки.</small>
+        {% endif %}
+    </div>
+
+    <div class="d-flex justify-content-between align-items-start flex-wrap">
+        <div>
+            <small class="text-uppercase" style="opacity: 0.7; letter-spacing: 2px;">
+                План подготовки
+            </small>
+            <h1 class="display-5 mt-1">
+                <i class="bi bi-trophy-fill" style="color: #FF6B35;"></i>
+                {{ plan.goal_race }}
+            </h1>
+            <p class="mb-0 mt-2" style="opacity: 0.8;">
+                Создан {{ plan.created_at|date:"d.m.Y в H:i" }}
+            </p>
+        </div>
+        <div>
+            {% if plan.is_active %}
+                <span class="badge bg-success fs-6">✓ Активен</span>
+            {% else %}
+                <span class="badge bg-secondary fs-6">Архив</span>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="row g-3 mt-4">
+        <div class="col-md-3 col-6">
+            <div class="plan-stat">
+                <div class="value">{{ plan.snapshot_vdot }}</div>
+                <div class="label">VDOT</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="plan-stat">
+                <div class="value">{{ plan.goal_time_formatted }}</div>
+                <div class="label">Целевое время</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="plan-stat">
+                <div class="value">{{ plan.total_weeks }}</div>
+                <div class="label">Недель</div>
+            </div>
+        </div>
+        <div class="col-md-3 col-6">
+            <div class="plan-stat">
+                <div class="value">{{ plan.total_km }}</div>
+                <div class="label">Рассчитано км{% if plan_unknown_count or plan_description_only_count %}*{% endif %}</div>
+            </div>
+        </div>
+    </div>
+
+    {% if plan_unknown_count %}
+        <p class="small mt-3 mb-0" style="opacity: 0.8;">
+            * У тренировок с неизвестным объёмом ({{ plan_unknown_count }}) не удалось
+            надёжно рассчитать километраж — он не включён в сумму.
+        </p>
+    {% endif %}
+    {% if plan_description_only_count %}
+        <p class="small mt-1 mb-0" style="opacity: 0.8;">
+            * Недельные блоки без детализации ({{ plan_description_only_count }})
+            заданы только описанием — их объём не включён в сумму.
+        </p>
+    {% endif %}
+    {% if plan_estimated_count %}
+        <p class="small mt-1 mb-0" style="opacity: 0.8;">
+            ≈ Объём таких тренировок оценён по описанию или заметке.
+        </p>
+    {% endif %}
+
+</div>
+
+{# ============ КНОПКИ УПРАВЛЕНИЯ ============ #}
+<div class="d-flex gap-2 mb-4 flex-wrap no-print">
+    <a href="{% url 'plan_list' %}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Мои планы
+    </a>
+    {% if can_create_plan %}
+        <a href="{% url 'plan_create' %}" class="btn btn-runbro">
+            <i class="bi bi-plus-circle"></i> Создать новый
+        </a>
+    {% else %}
+        <button type="button" class="btn btn-runbro" disabled
+                title="Сначала отметьте выполненными все пункты активного плана">
+            Сначала завершите активный план
+        </button>
+    {% endif %}
+    <form method="post" action="{% url 'plan_delete' plan.pk %}"
+          onsubmit="return confirm('Удалить этот план? Это действие нельзя отменить.');">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-outline-danger">
+            <i class="bi bi-trash"></i> Удалить план
+        </button>
+    </form>
+    <button type="button" class="btn btn-outline-secondary" onclick="window.print()">
+        <i class="bi bi-printer"></i> Печать плана
+    </button>
+    <button type="button" class="btn btn-outline-danger" onclick="window.print()"
+            title="В диалоге печати выберите «Сохранить как PDF»">
+        <i class="bi bi-file-earmark-pdf"></i> Экспорт в PDF
+    </button>
+</div>
+
+{% if plan.is_active %}
+    <div class="card shadow-sm mb-4 no-print">
+        <div class="card-body d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <h2 class="h5 mb-1">Как вам нагрузка?</h2>
+                <p class="text-muted mb-0">Текущий объём: {{ adjustment_percent }}%. Будет создана новая версия плана.</p>
+            </div>
+            <div class="d-flex flex-wrap gap-2">
+                <form method="post" action="{% url 'plan_adjust' plan.pk %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="feedback" value="fatigued">
+                    <button type="submit" class="btn btn-outline-warning"
+                            {% if not can_reduce_adjustment %}disabled{% endif %}>
+                        Чувствую усталость
+                    </button>
+                </form>
+                <form method="post" action="{% url 'plan_adjust' plan.pk %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="feedback" value="easy">
+                    <button type="submit" class="btn btn-outline-success"
+                            {% if not can_increase_adjustment %}disabled{% endif %}>
+                        Очень легко
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endif %}
+
+{# ============ ФАЗЫ + НЕДЕЛИ ============ #}
+{% for phase in plan_data.phases %}
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h2 class="phase-title">
+                <i class="bi bi-layers-fill" style="color: #FF6B35;"></i>
+                Фаза {{ phase.phase }}: {{ phase.name }}
+            </h2>
+
+            <div class="accordion week-accordion" id="phase-{{ phase.phase }}-accordion">
+                {% for week in phase.weeks %}
+                    <div class="accordion-item mb-2">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button"
+                                    data-bs-toggle="collapse"
+                                    data-bs-target="#week-{{ phase.phase }}-{{ forloop.counter }}">
+                                <strong>Неделя {{ week.week }}</strong>
+                                {% if week.trainings %}
+                                    <span class="badge bg-secondary ms-3">
+                                        Тренировок: {{ week.trainings|length }}
+                                    </span>
+                                {% endif %}
+                            </button>
+                        </h2>
+                        <div id="week-{{ phase.phase }}-{{ forloop.counter }}"
+                             class="accordion-collapse collapse"
+                             data-bs-parent="#phase-{{ phase.phase }}-accordion">
+                            <div class="accordion-body bg-body-tertiary">
+
+                                {# Описание (недели без детализации) #}
+                                {% if week.description and not week.trainings %}
+                                    <p class="text-muted mb-0">
+                                        <i class="bi bi-info-circle"></i> {{ week.description }}
+                                    </p>
+                                    {% if week.completion_key %}
+                                        <small class="d-block text-muted mt-2">{{ week.completion_label }}</small>
+                                        <form method="post" action="{% url 'workout_complete' plan.pk %}"
+                                              class="mt-3 text-end no-print">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="workout_key" value="{{ week.completion_key }}">
+                                            <button type="submit"
+                                                    class="btn btn-sm {% if week.is_completed %}btn-success{% else %}btn-outline-success{% endif %}"
+                                                    {% if week.is_completed or not week.can_complete %}disabled{% endif %}
+                                                    {% if not week.can_complete and not week.is_completed %}title="Сначала выполните предыдущий пункт"{% endif %}>
+                                                {% if week.is_completed %}✓ Выполнено{% elif week.can_complete %}Отметить выполненной{% else %}Недоступно{% endif %}
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                {% endif %}
+
+                                {# Тренировки #}
+                                {% for training in week.trainings %}
+                                    <div class="training-card {{ training.type }}{% if training.is_completed %} is-completed{% endif %}">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div>
+                                                <h6 class="mb-1">
+                                                    <span class="badge bg-dark">{{ training.display_day }}</span>
+                                                    {{ training.display_type }}
+                                                </h6>
+                                                {% if training.display_zone %}
+                                                    <span class="zone-badge{% if training.display_zone_class %} zone-{{ training.display_zone_class }}{% endif %}">
+                                                        Зона {{ training.display_zone }}
+                                                    </span>
+                                                {% endif %}
+                                                {% if training.pace_formatted %}
+                                                    <span class="ms-2 text-muted small">
+                                                        темп: <strong>{{ training.pace_formatted }}</strong>
+                                                    </span>
+                                                {% endif %}
+                                            </div>
+                                            <div class="text-end">
+                                                {% if training.total_km %}
+                                                    <span class="badge bg-primary fs-6">
+                                                        {% if training.volume_estimated %}≈ {% endif %}{{ training.total_km }} км
+                                                    </span>
+                                                {% elif training.volume_unknown %}
+                                                    <span class="badge bg-warning text-dark">
+                                                        объём не рассчитан
+                                                    </span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+
+                                        {# Описание (серии, фартлек) #}
+                                        {% if training.description %}
+                                            <p class="text-muted small mt-2 mb-0">
+                                                {{ training.description }}
+                                            </p>
+                                        {% endif %}
+
+                                        {# Блоки #}
+                                        {% if training.blocks %}
+                                            <div class="mt-2">
+                                                {% for block in training.blocks %}
+                                                    <div class="block-item">
+                                                        <div>
+                                                            <span class="badge bg-body-secondary text-body border">
+                                                                {{ block.display_type }}
+                                                            </span>
+                                                            {% if block.display_zone %}
+                                                                <span class="zone-badge{% if block.display_zone_class %} zone-{{ block.display_zone_class }}{% endif %}">
+                                                                    {{ block.display_zone }}
+                                                                </span>
+                                                            {% endif %}
+                                                            {% if block.display_repeats and block.display_repeats != '1' %}
+                                                                <span class="text-muted small ms-1">
+                                                                    × {{ block.display_repeats }}
+                                                                </span>
+                                                            {% endif %}
+                                                            {% if block.display_distance %}
+                                                                <span class="text-muted small">
+                                                                    {{ block.display_distance }}
+                                                                </span>
+                                                            {% endif %}
+                                                            {% if block.display_time %}
+                                                                <span class="text-muted small">
+                                                                    {{ block.display_time }}
+                                                                </span>
+                                                            {% endif %}
+                                                            {% if block.display_rest %}
+                                                                <span class="text-muted small">
+                                                                    отдых: {{ block.display_rest }}
+                                                                </span>
+                                                            {% endif %}
+                                                            {% if block.note %}
+                                                                <span class="text-muted small fst-italic">
+                                                                    {{ block.note }}
+                                                                </span>
+                                                            {% endif %}
+                                                        </div>
+                                                        <div class="text-end">
+                                                            {% if block.pace_formatted %}
+                                                                <strong>{{ block.pace_formatted }}</strong>
+                                                            {% endif %}
+                                                            {% if block.total_km %}
+                                                                <span class="text-muted small ms-2">
+                                                                    {{ block.total_km }} км
+                                                                </span>
+                                                            {% endif %}
+                                                        </div>
+                                                    </div>
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+
+                                        {# Ограничения #}
+                                        {% if training.constraint %}
+                                            <div class="alert alert-warning small mt-2 mb-0 py-2">
+                                                <i class="bi bi-exclamation-triangle"></i>
+                                                {{ training.constraint }}
+                                            </div>
+                                        {% endif %}
+
+                                        <form method="post" action="{% url 'workout_complete' plan.pk %}"
+                                              class="mt-3 text-end no-print">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="workout_key" value="{{ training.completion_key }}">
+                                            <button type="submit"
+                                                    class="btn btn-sm {% if training.is_completed %}btn-success{% else %}btn-outline-success{% endif %}"
+                                                    {% if training.is_completed or not training.can_complete %}disabled{% endif %}
+                                                    {% if training.is_completed %}aria-pressed="true"{% elif not training.can_complete %}title="Сначала выполните предыдущий пункт"{% endif %}>
+                                                {% if training.is_completed %}✓ Выполнено{% elif training.can_complete %}Отметить выполненной{% else %}Недоступно{% endif %}
+                                            </button>
+                                        </form>
+                                    </div>
+                                {% endfor %}
+
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+{% endfor %}
+
+{% endblock %}
